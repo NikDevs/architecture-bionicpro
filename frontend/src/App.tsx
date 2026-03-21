@@ -3,6 +3,11 @@ import { ReactKeycloakProvider } from '@react-keycloak/web';
 import Keycloak, { KeycloakConfig } from 'keycloak-js';
 import ReportPage from './components/ReportPage';
 
+/**
+ * Несмотря на внедрение PKCE, текущая реализация остаётся частично небезопасной, так как access token доступен во frontend.
+ * Для полного устранения рисков необходимо внедрение BFF-паттерна и использование httpOnly cookies.
+ */
+
 const keycloakConfig: KeycloakConfig = {
   url: process.env.REACT_APP_KEYCLOAK_URL,
   realm: process.env.REACT_APP_KEYCLOAK_REALM||"",
@@ -13,7 +18,15 @@ const keycloak = new Keycloak(keycloakConfig);
 
 const App: React.FC = () => {
   return (
-    <ReactKeycloakProvider authClient={keycloak}>
+    <ReactKeycloakProvider
+      authClient={keycloak}
+      initOptions={{
+        pkceMethod: "S256",
+        flow: "standard",
+        checkLoginIframe: false,
+        silentCheckSsoRedirectUri: window.location.origin + "/silent-check-sso.html"
+      }}
+    >
       <div className="App">
         <ReportPage />
       </div>
