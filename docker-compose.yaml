@@ -40,3 +40,38 @@ services:
       REACT_APP_KEYCLOAK_URL: http://localhost:8080
       REACT_APP_KEYCLOAK_REALM: reports-realm
       REACT_APP_KEYCLOAK_CLIENT_ID: reports-frontend
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse
+    environment:
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: password
+    ports:
+      - "9000:9000"
+      - "8123:8123"
+  airflow:
+    build: ./airflow
+    container_name: airflow
+    depends_on:
+      - clickhouse
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+    ports:
+      - "8081:8080"
+    command: >
+      bash -c "
+      airflow db migrate &&
+      airflow users create --username admin --password admin --firstname admin --lastname admin --role Admin --email admin@example.com &&
+      airflow scheduler & 
+      sleep 5 &&
+      airflow webserver
+      "
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - clickhouse
