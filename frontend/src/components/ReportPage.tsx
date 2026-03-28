@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { useKeycloak } from '@react-keycloak/web';
 
 interface ReportRow {
-  report_date: string;
-  prosthesis_id: string;
-  total_movements: number;
-  avg_signal: number;
-  last_activity: string;
+  0: string; //user
+  1: string; //prosthesis_id
+  2: number; //total_movements
+  3: number; //avg_signal
+  4: string; //last_activity
+  5: string; //report_date
 }
 
 const ReportPage: React.FC = () => {
@@ -82,8 +83,10 @@ const ReportPage: React.FC = () => {
           </div>
         )}
 
-        {reportData?.length && (
-          <table>
+        {!!reportData?.length && (
+          <table style={{
+            border: '1px solid black',
+          }}>
             <thead>
             <tr>
               <th>Дата отчета</th>
@@ -96,11 +99,11 @@ const ReportPage: React.FC = () => {
             <tbody>
             {reportData.map(row => (
               <tr>
-                <td>{row.report_date}</td>
-                <td>{row.prosthesis_id}</td>
-                <td>{row.total_movements}</td>
-                <td>{row.avg_signal}</td>
-                <td>{row.last_activity}</td>
+                <td>{row['5']}</td>
+                <td>{row['1']}</td>
+                <td>{row['2']}</td>
+                <td>{row['3']}</td>
+                <td>{row['4']}</td>
               </tr>
             ))}
             </tbody>
